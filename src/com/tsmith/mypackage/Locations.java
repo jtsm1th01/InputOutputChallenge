@@ -1,8 +1,6 @@
 package com.tsmith.mypackage;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -11,15 +9,32 @@ import java.util.*;
 public class Locations implements Map<Integer, Location> {
     private static Map<Integer, Location> locations = new HashMap<>();
 
+
+    public static void main(String[] args) {
+
+        System.out.println("Writing the files...");
+        try(BufferedWriter locFileWriter = new BufferedWriter(new FileWriter("locations2.txt"));
+            BufferedWriter dirFileWriter = new BufferedWriter(new FileWriter("directions2.txt"))) {
+            for(Location location: locations.values()) {
+                locFileWriter.write(location.getLocationID() + "," + location.getDescription() + "\n");
+                for(Map.Entry<String, Integer> exit: location.getExits().entrySet()) {
+                    dirFileWriter.write(location.getLocationID() + "," + exit.getKey() + "," + exit.getValue() + "\n");
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     static {
 
         System.out.println("Static initialization started...");
-        try (Scanner scanner = new Scanner(new FileReader("locations_big.txt"))) {
-            scanner.useDelimiter(",");
-            while (scanner.hasNextLine()) {
-                int loc = scanner.nextInt();
-                scanner.skip(scanner.delimiter());
-                String description = scanner.nextLine();
+        try (BufferedReader locFile = new BufferedReader(new FileReader("locations2.txt"))) {
+            String input;
+            while((input = locFile.readLine()) != null) {
+                String[] data = input.split(",");
+                int loc = Integer.parseInt(data[0]);
+                String description = data[1];
                 System.out.println("Imported: " + loc + "," + description);
                 Map<String, Integer> tempExit = new HashMap<>();
                 locations.put(loc, new Location(loc, description, tempExit));
@@ -31,10 +46,10 @@ public class Locations implements Map<Integer, Location> {
 
         // And now the exits
 
-        try (Scanner scanner = new Scanner(new BufferedReader(new FileReader("directions_big.txt")))) {
-            scanner.useDelimiter(",");
-            while(scanner.hasNextLine()) {
-                String[] data = scanner.nextLine().split(",");
+        try (BufferedReader dirFile = new BufferedReader(new FileReader("directions2.txt"))) {
+            String input;
+            while((input = dirFile.readLine()) != null) {
+                String[] data = input.split(",");
                 int loc = Integer.parseInt(data[0]);
                 String direction = data[1];
                 int destination = Integer.parseInt(data[2]);

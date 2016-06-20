@@ -19,7 +19,6 @@ public class Location {
         } else {
             this.exits = new HashMap<>();
         }
-        this.exits.put("Q", 0);
     }
 
     public void addExit(String direction, int location) {
